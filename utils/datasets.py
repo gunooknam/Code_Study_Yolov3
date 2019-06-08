@@ -78,7 +78,7 @@ class ListDataset(Dataset):
         self.max_objects = 100 
         self.augment = augment                     # augment를 할 까?
         self.multiscale = multiscale
-        self.normalized_labels = normalized_labels 
+        self.normalized_labels = normalized_labels
         self.min_size =  self.img_size - 3 * 32
         self.max_size =  self.img_size + 3 * 32
         self.batch_count = 0
@@ -138,6 +138,7 @@ class ListDataset(Dataset):
         return img_path, img, targets
 
 
+# Testing Phase
 if __name__ == "__main__" :
     a= torch.tensor(np.ones((5,3))).unsqueeze(0)
     print(a.shape)

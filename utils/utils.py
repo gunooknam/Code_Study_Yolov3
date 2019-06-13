@@ -276,6 +276,9 @@ def non_max_suppression(prediction, conf_thres=0.5, nms_thres=0.4):
 
     return output
 
+
+
+# 나주웅에
 def build_targets(pred_boxes, pred_cls, target, anchors, ignore_thres):
 
     ByteTensor = torch.cuda.ByteTensor if pred_boxes.is_cuda else torch.ByteTensor
@@ -304,7 +307,8 @@ def build_targets(pred_boxes, pred_cls, target, anchors, ignore_thres):
     # Get anchors with best iou
     ious = torch.stack([bbox_wh_iou(anchor, gwh) for anchor in anchors ])
     best_ious, best_n = ious.max(0)
-    
+    # Separate target Values
+
 
 # >> Test Phase
 if __name__ == "__main__" :

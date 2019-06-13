@@ -50,7 +50,7 @@ def parse_model_config(path):
              module_defs[-1]['type'] = line[1:-1].rstrip() # type이라는 diction에 convolutional 이런 것을 저장
              if module_defs[-1]['type'] == 'convolutional':
                  module_defs[-1]['batch_normalize'] = 0 # batch norm은 일단 0으로 초기화
-         else :
+         else : # 이부분은 hyper parameter 이다.
              key, value = line.split("=")
              value = value.strip()
              module_defs[-1][key.rstrip()] = value.strip()
@@ -84,11 +84,25 @@ def parse_data_config(path):
 # Testing
 if __name__ == "__main__" :
     module_defs=parse_model_config("../config/yolov3-tiny.cfg")
+    # [ net모듈,
+    #   cov모듈,
+    #   maxpool모듈,
+    #   conv모둘,
+    #   maxpool모듈] -> 리스트형태다.
+    #   그 안에는 key value이다.
     print(module_defs[0]['type']) # 그러고 나머지는 key : value 형식으로 저장
     print(module_defs[1]['type'])
     print(module_defs[2]['type'])
     print(module_defs[3]['type'])
-    print(module_defs[4]['type'])
+    print("[-----------------]")
+    print(module_defs[21])
+    print(type(module_defs[21]['layers']))
+    str=module_defs[21]['layers']
+    print("<<----------------->>")
+    hyperparams = module_defs.pop(0) # pop이 되니까 리스트 인덱싱이 바뀐다.
+    layers = [int(x) for x in module_defs[17]["layers"].split(",")]
+    print(layers)
+    print("<<----------------->>")
     '''
     net
     convolutional

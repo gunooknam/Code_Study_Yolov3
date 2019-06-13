@@ -13,4 +13,4 @@ yolov3 - <https://arxiv.org/abs/1804.02767>
 
 <https://pjreddie.com/darknet/yolo/> 
 
-https://github.com/eriklindernoren>
+https://github.com/eriklindernoren

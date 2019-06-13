@@ -1,4 +1,4 @@
-from __future__ import division
+﻿from __future__ import division
 import math
 import time
 import tqdm
@@ -17,7 +17,7 @@ def load_classes(path):
     """ Loads class labels at 'path'  """
     fp = open(path, "r")
     names = fp.read().split("\n")[:-1]
-    # -1까�? ?�는 ?�유 마�?막에 공백???�다.
+    # -1까지 하는 이유 마지막에 공백이 있다.
     print("Load Class Nums : ",len(names))
     return names
 
@@ -33,7 +33,7 @@ def weights_init_normal(m):
 
 def rescale_boxes(boxes, current_dim, original_shape):
     # Rescales bounding Boxes to the original shape
-    orig_h, orig_w = original_shape # ?�래??shape???�는??
+    orig_h, orig_w = original_shape # 원래의 shape을 넣는다.
     # The Amount of Padding That was added
     pad_x = max(orig_h - orig_w, 0) * (current_dim / max(original_shape))
     pad_y = max(orig_w - orig_w, 0) * (current_dim / max(original_shape))
@@ -47,10 +47,10 @@ def rescale_boxes(boxes, current_dim, original_shape):
     return boxes
 
 # xywh
-# x,y??중심??좌표?�다. w,h??width?� height?�다. 
+# x,y는 중심의 좌표이다. w,h는 width와 height이다. 
 # xyxy => # left top, right bottom
-def xywh2xyxy(x): # shape ?��??�이 가???�쪽??format??변�?
-    y = x.new(x.shape) # torch??tensor?�는 new?�는 ?�수가 ?�음 그냥 x.shape?�도�?tensor 만드????
+def xywh2xyxy(x): # shape 상관없이 가장 끝쪽의 format을 변경
+    y = x.new(x.shape) # torch의 tensor에는 new라는 함수가 있음 그냥 x.shape정도로 tensor 만드는 듯
     y[..., 0] = x[..., 0] - x[..., 2] / 2
     y[..., 1] = x[..., 1] - x[..., 3] / 2
     y[..., 2] = x[..., 0] + x[..., 2] / 2
@@ -66,13 +66,13 @@ def ap_per_class(tp, conf, pred_cls, target_cls): # Compute the average precisio
     #   target_cls : True object classes (list)
     # Returns
     #   The average precision as computed in py-faster-rcnn
-    # argsort??index ?�으�?sort ?�는 �?L=[5,2,3,5,6] # >>> np.argsort(L) # array([1, 2, 0, 3, 4], dtype=int64)
-    # np.argsort(L) ?�에 L?�라??것에?��? -�?붙이�???�� 출력
+    # argsort는 index 순으로 sort 하는 것 L=[5,2,3,5,6] # >>> np.argsort(L) # array([1, 2, 0, 3, 4], dtype=int64)
+    # np.argsort(L) 안에 L이라는 것에다가 -를 붙이면 역순 출력
     i = np.argsort(-conf)
     tp ,conf, pred_cls = tp[i], conf[i], pred_cls[i]
 
     # Find unique classes
-    unique_classes = np.unique(target_cls) # True Object???�래?�이??
+    unique_classes = np.unique(target_cls) # True Object의 클래스이다.
 
     # Create Precision-Recall curve and compute Ap for each class
     ap, p, r = [], [], []
@@ -85,39 +85,39 @@ def ap_per_class(tp, conf, pred_cls, target_cls): # Compute the average precisio
 def compute_ap(recall, precision):
     '''
     # Args
-        recall : The recall curve (list)   # recall�?precision??index??구간 개수??같을 것이?? 
+        recall : The recall curve (list)   # recall과 precision의 index의 구간 개수는 같을 것이다. 
         precision : The precision curve (list)
     # Returns
         The average precision as computed in py-faster-rcnn.
     '''
     # correct AP calculation
     # first append sentinel values at the end
-    # 가로축?� Recall ?�고
-    # ?�로축�? Precision ?�길 ?�한??
-    mrec = np.concatenate(([0.0], recall, [1.0])) # recall ??관??curve List?�다.
+    # 가로축은 Recall 이고
+    # 세로축은 Precision 이길 원한다.
+    mrec = np.concatenate(([0.0], recall, [1.0])) # recall 에 관한 curve List이다.
     mpre = np.concatenate(([0,0], recall, [0.0]))
 
     # compute the precision envelope
     for i in range(mpre.size -1, 0, -1):
         mpre[i - 1] = np.maximum(mpre[i - 1], mpre[i])
-    # ?�수 부????��
-    # ex). mpre.size 10?�면 10, 9 ,8, 7, 6, 5, 4, 3, 2,...
+    # 큰수 부터 역순
+    # ex). mpre.size 10이면 10, 9 ,8, 7, 6, 5, 4, 3, 2,...
 
     # to calculate area under PR curve, look for points
     # where X axis (recall) changes value
-    i = np.where(mrec[1:] != mrec[:-1])[0] # ?�른 부분의 index�?리턴
+    i = np.where(mrec[1:] != mrec[:-1])[0] # 다른 부분의 index를 리턴
 
     # and sum(\Delta recall) * prec
-    ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i+1] ) # i???�덱?�이�??�문??
-    # ?��?분�? ?�분 같�? ?�낌?�다.
-    # mrec[i+1] - mrec[i]??구간 ?�이값들??리스?�이??
-    # ?�것??마찬가지�?구간 ?�이값인 mpre[i+1]?�과 곱하???�것???�을 구하??�?=> AUC??
+    ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i+1] ) # i는 인덱스이기 때문에 
+    # 이부분은 적분 같은 느낌이다.
+    # mrec[i+1] - mrec[i]는 구간 사이값들의 리스트이다.
+    # 이것을 마찬가지로 구간 높이값인 mpre[i+1]들과 곱하여 이것의 합을 구하는 것 => AUC임
     return ap
 
 def get_batch_statistics(outputs, targets, iou_threshold):
     """ Compute true positives, predicted scores and predicted labels per sample """
     batch_metrics = [] 
-    for sample_i in range(len(outputs)): # output ?� 배열?�태
+    for sample_i in range(len(outputs)): # output 은 배열형태
 
         if outputs[sample_i] is None:
             continue
@@ -152,7 +152,7 @@ def get_batch_statistics(outputs, targets, iou_threshold):
         return batch_metrics
 
 def bbox_wh_iou(wh1, wh2):
-    wh2 = wh2.t() # torch.t()??그냥 transpose??
+    wh2 = wh2.t() # torch.t()는 그냥 transpose임
     w1, h1 = wh1[0], wh1[1]
     w2, h2 = wh2[0], wh2[1]
     inter_area = torch.min(w1, w2) * torch.min(h1, h2)
@@ -161,20 +161,20 @@ def bbox_wh_iou(wh1, wh2):
 
 def bbox_iou(box1, box2, x1y1x2y2=True):
     """
-    => torch Tensor ?�?�이 ?�으�??�어?�다. ??type?� forch.float64 or float32
-    Args : box1???��?지 ?�?�이 ?�다.   x1, y1, x2, y2
-    Case1 : box1[Num of Batch??개수,   0~3 ]?�라�? => 기존 ?�태�??��?
+    => torch Tensor 타입이 안으로 들어온다. 단 type은 forch.float64 or float32
+    Args : box1는 두가지 타입이 있다.   x1, y1, x2, y2
+    Case1 : box1[Num of Batch의 개수,   0~3 ]이라면? => 기존 상태를 유지
                                         xc, yc, w, h
-    Case2 : box1[Num of Batch??개수,   0~3 ]?�라�? => x1y1x2y2�?바꾼??
-    그래??IOU�?구할 ?�는 left Top, right bottom????좌표 ?�태�?바꿔???�다.
+    Case2 : box1[Num of Batch의 개수,   0~3 ]이라면? => x1y1x2y2로 바꾼다.
+    그래서 IOU를 구할 때는 left Top, right bottom의 두 좌표 형태로 바꿔야 한다.
     """
-    if not x1y1x2y2: # 만약??=> xc,yc,w,h (xc,yc?� ?�터??, ?�걸 left_top, right_bottom ?�로 바꿈
+    if not x1y1x2y2: # 만약에 => xc,yc,w,h (xc,yc은 센터점), 이걸 left_top, right_bottom 으로 바꿈
         # Transform from center and width to exact coordinates
         b1_x1, b1_x2 = box1[:, 0] - box1[:, 2] / 2, box1[:, 0] + box1[:, 2] / 2
         b1_y1, b1_y2 = box1[:, 1] - box1[:, 3] / 2, box1[:, 1] + box1[:, 3] / 2
         b2_x1, b2_x2 = box2[:, 0] - box2[:, 2] / 2, box2[:, 0] + box2[:, 2] / 2
         b2_y1, b2_y2 = box2[:, 1] - box2[:, 3] / 2, box2[:, 1] + box2[:, 3] / 2
-    else : # ?��? left_top, right_bottom ?�로 ?�어 ?�다�?
+    else : # 이미 left_top, right_bottom 으로 되어 있다면
         b1_x1, b1_y1, b1_x2, b1_y2 = box1[:, 0], box1[:, 1], box1[:, 2], box1[:, 3]
         b2_x1, b2_y1, b2_x2, b2_y2 = box2[:, 0], box2[:, 1], box2[:, 2], box2[:, 3]
 
@@ -191,94 +191,94 @@ def bbox_iou(box1, box2, x1y1x2y2=True):
     inter_area = torch.clamp( inter_rect_x2 - inter_rect_x1 + 1, min=0) * torch.clamp(inter_rect_y2 - inter_rect_y1 + 1, min=0)
 
     # Union Area
-    b1_area = (b1_x2 - b1_x1 + 1) * (b1_y2 - b1_y1 + 1) # batch ?�으�??�번????구함
-    b2_area = (b2_x2 - b2_x1 + 1) * (b2_y2 - b2_y1 + 1) # batch ?�으�??�번????구함
+    b1_area = (b1_x2 - b1_x1 + 1) * (b1_y2 - b1_y1 + 1) # batch 통으로 한번에 다 구함
+    b2_area = (b2_x2 - b2_x1 + 1) * (b2_y2 - b2_y1 + 1) # batch 통으로 한번에 다 구함
     print(b1_area, b2_area, inter_area)
     iou = inter_area / (b1_area + b2_area - inter_area + 1e-16)
-    return iou # batch 만큼??iou가 ?�긴 List
+    return iou # batch 만큼의 iou가 담긴 List
 
 
 def non_max_suppression(prediction, conf_thres=0.5, nms_thres=0.4):
     """
-    # ?�건 ??맥시�??�프?�션?��? 기법?�데 ?�떠??threshold 값을 ?�하�?
-    ?�러??threshold 보다 confidence score가 ??���??�이 ???�보군에??지?�버리는 것이??
+    # 이건 논 맥시멈 서프레션이란 기법인데 어떠한 threshold 값을 정하고
+    이러한 threshold 보다 confidence score가 낮으면 답이 될 후보군에서 지워버리는 것이다.
     Returns dectections with shape:
         (x1, y1, x2, y2, obejct_conf, class_score, class_pred)
     """
     # From (center x, center y, width, height) to (x1, y1, x2, y2)
-    # prediction??batch?�위�??�을 것이??
-    prediction[..., :4] = xywh2xyxy(prediction[..., :4]) # 코코�??�거 shape??(1,개많??85) ?�정???�다.
-    # ?��?분에??iou 구하�??�한 top left, right bottom ?�식?�로 prediction?�라??tensor�?바꾸??부분이??
+    # prediction도 batch단위로 있을 것이다.
+    prediction[..., :4] = xywh2xyxy(prediction[..., :4]) # 코코면 이거 shape이 (1,개많음,85) 이정도 된다.
+    # 이부분에선 iou 구하기 위한 top left, right bottom 형식으로 prediction이라는 tensor로 바꾸는 부분이다.
 
     output = [None for _ in range(len(prediction))] # => [None, None, None, None, None, None, None.... ]
-    for image_i, image_pred in enumerate(prediction): # image index, image_pred 값을 뽑아?�당
-        image_pred = image_pred[ image_pred[:,4] >= conf_thres ] # ?�기??개쪼�?추려진다. [10647, 85]-> [5,85] ?�도?
-        # image_pred[:,4] ?�는 confidence 값이 conf_thres보다 ??경우??index�?추려?�다.
-        #  -> �?값을 가�?image_pred가 ?�시 추려?�진??
-        # image_pred??threshold???�해??걸러�?�?���?뽑아진다.!!
+    for image_i, image_pred in enumerate(prediction): # image index, image_pred 값을 뽑아낸당
+        image_pred = image_pred[ image_pred[:,4] >= conf_thres ] # 요기서 개쪼금 추려진다. [10647, 85]-> [5,85] 정도?
+        # image_pred[:,4] 라는 confidence 값이 conf_thres보다 큰 경우의 index를 추려낸다.
+        #  -> 그 값을 가진 image_pred가 다시 추려내진다.
+        # image_pred는 threshold에 의해서 걸러진 갯수로 뽑아진다.!!
 
-        if not image_pred.size(0): # 그런??만약??size??첫번�?rank가 0?�라�?..
+        if not image_pred.size(0): # 그런데 만약에 size의 첫번째 rank가 0이라믄...
             continue
 
         # Object Confidence times class confidence
-        # Object Confidence?� Class Confidence?�???�른 ?�기??
-        # Object Confidence??물체가 ?�기 Grid???�을 �?
-        # Class  Confidence???�떤 ?�래?�에 ?�???�률?�다.
+        # Object Confidence와 Class Confidence와는 다른 얘기다.
+        # Object Confidence는 물체가 여기 Grid에 있을 까?
+        # Class  Confidence는 어떤 클래스에 대한 확률이다.
         score = image_pred[:, 4] * image_pred[:, 5:].max(1)[0]
-        # ?�덱?�마??가????class confidence�?뽑고 그것�?같�? index??object confidence?� 곱한??
-        # max(1) ?�렇�??�면 2�??�상??tensor?�이 ?�옴 그중??0번째(값들)�?고르??것이??, 1번�?(index)??!
+        # 인덱스마다 가장 큰 class confidence를 뽑고 그것과 같은 index의 object confidence와 곱한다.
+        # max(1) 이렇게 하면 2개 이상의 tensor들이 나옴 그중에 0번째(값들)를 고르는 것이다., 1번쨰(index)들!!
 
-        #Sort By it             # ??버전?�서??pytorch?�서 argsort가 ?�되?��???..
-        image_pred = image_pred[(-score).numpy().argsort()] # threshold�??�해??5개�? 추려졌다�??�걸 ?�렬?�서 배치?�다.
-        # 그니�?index�?배열???�어�?그러�?�?배열??맞는 것만 추려�?
-        # score가 ???��?�??�덱?��? 뽑아??> argsort() -> 값순?�로 ?�렬조건?��?�?index가 ?�렬?�다.
-        # �?index??맞는 것을 ?�시 image_pred???�으므�?score ?�림 차순?�로 image_pred가 ??배열?�다.
+        #Sort By it             # 이 버전에서는 pytorch에서 argsort가 안되나부다...
+        image_pred = image_pred[(-score).numpy().argsort()] # threshold로 인해서 5개가 추려졌다면 이걸 정렬해서 배치한다.
+        # 그니까 index로 배열이 들어감 그러면 그 배열에 맞는 것만 추려짐
+        # score가 큰 순대로 인덱스를 뽑아냄-> argsort() -> 값순으로 정렬조건이지만 index가 정렬된다.
+        # 그 index에 맞는 것을 다시 image_pred에 넣으므로 score 내림 차순으로 image_pred가 재 배열된다.
 
 
-                                            # 5~85�?까�???class confidence 중에??max�?뽑아?�다.
-        class_confs, class_preds = image_pred[:, 5:].max(1, keepdim=True)  # max�?찾고 rank ?�나가 감소?�다. But dimension???��??�는 Trick???�다.
-        # threshold�??�해??5개�? 추려졌다�?5개의 confidence???�??값들 max 추린�?
-        # threshold�??�해??5개�? 추려졌다�?몇번�?predict???�래?�인지??class index
+                                            # 5~85개 까지의 class confidence 중에서 max를 뽑아낸다.
+        class_confs, class_preds = image_pred[:, 5:].max(1, keepdim=True)  # max를 찾고 rank 하나가 감소된다. But dimension을 유지하는 Trick을 썻다.
+        # threshold로 인해서 5개가 추려졌다면 5개의 confidence에 대한 값들 max 추린것
+        # threshold로 인해서 5개가 추려졌다면 몇번째 predict된 클래스인지의 class index
 
-                            # Cat???�는 것이?? xywh,class_confidence, class_label ?�렇�?추려진다.
+                            # Cat을 하는 것이다. xywh,class_confidence, class_label 이렇게 추려진다.
         detections = torch.cat((image_pred[:, :5],
-                                class_confs.float(),  # class_index???�당?�는 confidence가 뭐니?
-                                class_preds.float()), # 몇번??class index??
+                                class_confs.float(),  # class_index에 해당하는 confidence가 뭐니?
+                                class_preds.float()), # 몇번의 class index니?
                                 1)
-                                # 마�?�??�자??dimension?�데 ?�디�??�쳐줄�? ?�한??
-                                # 1?????�유??=> ?�의 batch???�기??것을 ?�한 것이??
+                                # 마지막 인자는 dimension인데 어디를 합쳐줄지 정한다.
+                                # 1을 한 이유는 => 앞의 batch는 남기는 것을 원한 것이다.
 
-        # 그래??결과??threshold�?5개�? 추려졌다�?(5,7) ??tensor가 detection?�로 뽑아?��???것이??
+        # 그래서 결과는 threshold로 5개가 추려졌다면 (5,7) 의 tensor가 detection으로 뽑아내지는 것이다.
 
         ######## Perform non-maximum suppression #########
         keep_boxes = []
-        while detections.size(0): # 첫번�?score가 ?��? 것과 [1,4] -> ?�것�?   ?�전??추려??[5,4]�???비교?�다. 그래??[5] ?�는 iou가 ?�온?? => broadcast가 ?�는가 ?�다.
+        while detections.size(0): # 첫번째 score가 높은 것과 [1,4] -> 이것과,   이전에 추려낸 [5,4]를 다 비교한다. 그래서 [5] 라는 iou가 나온다. => broadcast가 되는가 싶다.
             large_overlap=bbox_iou( detections[0, :4].unsqueeze(0), detections[:, :4])  > nms_thres # Non Maximum Suppression Parameter
-            label_match = detections[0, -1] == detections[:, -1] # 그래??score가 ?��? 것과 ?�머지 것들�??�벨??같�? 것을 추려?�다.
-            # ?��? ?�어 detections[0, -1] ?� tensor(0.)
-            #    그리�?detections[:, -1] ?� tensor([ 0.,  0., 17., 16., 17.]) ?�고 ?�자 그러�?매치 ?�는 것�? [1, 1, 0, 0, 0]???�다 broadCasting !
+            label_match = detections[0, -1] == detections[:, -1] # 그래서 score가 높은 것과 나머지 것들과 라벨이 같은 것을 추려낸다.
+            # 예를 들어 detections[0, -1] 은 tensor(0.)
+            #    그리고 detections[:, -1] 은 tensor([ 0.,  0., 17., 16., 17.]) 라고 하자 그러면 매치 되는 것은 [1, 1, 0, 0, 0]이 된다 broadCasting !
             # Indices of boxes with lower confidence scores, large IOUs and matching labels
-            invaild  = large_overlap & label_match # matching ?�는 ?�덱?�끼�?배열??만들?�진?? => Index Masking
-            weights = detections[invaild, 4:5] # 1??index�?켜져??weights??배열 ?�태�??�?�된?? Weight?� => 4번�?!!! Object Confidence?�다.
+            invaild  = large_overlap & label_match # matching 되는 인덱스끼리 배열이 만들어진다. => Index Masking
+            weights = detections[invaild, 4:5] # 1인 index만 켜져서 weights에 배열 상태로 저장된다. Weight란 => 4번쨰!!! Object Confidence이다.
             # Merge overlapping bboxes by order of confidence
-            detections[0, :4] = (weights * detections[invaild, :4]).sum(0) / weights.sum() # object confidence?� detection??값들??곱해?�서
-            # ?�그�? obj_conf(?�러�?*(det xywh) ] / ?�러�?obj_conf ??
-            # 그러?�까 obj_conf�?weighted sum & norm???�주??것이??
-            keep_boxes += [detections[0]] # 가??좋�? detection??Keep ?�다.
-            detections = detections[~invaild] # ?�제???�까 invalid가 ?�니?�던 ?�들 중에??detection??찾는??
-            #  그러�??�시 ?�일 score ?��?�??�로간다. 그러�??�러???�일 score가 ?��?것과 ?�머지�?비교?�다. 그래??iou가 threshold 보다 ??것을 추려?�고
-        if keep_boxes: # 만약??keep_boxes가 ?�다�?->
+            detections[0, :4] = (weights * detections[invaild, :4]).sum(0) / weights.sum() # object confidence와 detection의 값들이 곱해져서
+            # 시그마[ obj_conf(여러개)*(det xywh) ] / 여러개 obj_conf 합
+            # 그러니까 obj_conf로 weighted sum & norm을 해주는 것이다.
+            keep_boxes += [detections[0]] # 가장 좋은 detection을 Keep 한다.
+            detections = detections[~invaild] # 이제는 아까 invalid가 아니었던 애들 중에서 detection을 찾는다.
+            #  그러면 다시 제일 score 높은게 위로간다. 그러면 이러한 제일 score가 높은것과 나머지를 비교한다. 그래서 iou가 threshold 보다 큰 것을 추려내고
+        if keep_boxes: # 만약에 keep_boxes가 있다면 ->
             output[image_i] = torch.stack(keep_boxes)
-            # torch.stack =>  [ torch.tensor, torch.tensor, ... ] ?�렇�?구성?�었?�면 ?�것?�을 torch.tensor ?�태�?만드??것이??
-            # 리스?�에 torch.tensor 가 ?�러�??�겼?�면... ?�것?�을 ?�서?�태�?만들??
-            # �??��?지 image_i ?�덱?�에 ?�??바운??박스 몇개�?뽑아?�는 것이??
+            # torch.stack =>  [ torch.tensor, torch.tensor, ... ] 이렇게 구성되었다면 이것들을 torch.tensor 형태로 만드는 것이다.
+            # 리스트에 torch.tensor 가 여러개 담겼다면... 이것들을 텐서형태로 만들자
+            # 즉 이미지 image_i 인덱스에 대한 바운드 박스 몇개를 뽑아내는 것이다.
         ##################################################
 
     return output
 
 
 
-# ?�주?�에
+# 나주웅에
 def build_targets(pred_boxes, pred_cls, target, anchors, ignore_thres):
 
     ByteTensor = torch.cuda.ByteTensor if pred_boxes.is_cuda else torch.ByteTensor
@@ -290,8 +290,8 @@ def build_targets(pred_boxes, pred_cls, target, anchors, ignore_thres):
     nG = pred_boxes.size(2)
 
     # Output tensors
-    obj_mask = ByteTensor(nB, nA, nG, nG).fill_(0) # 값으�?0??채우?�다~
-    noobj_mask = ByteTensor(nB, nA, nG, nG).fill_(1) # 1??채우?�다.
+    obj_mask = ByteTensor(nB, nA, nG, nG).fill_(0) # 값으로 0을 채우운다~
+    noobj_mask = ByteTensor(nB, nA, nG, nG).fill_(1) # 1을 채우운다.
     class_mask = FloatTensor(nB, nA, nG, nG).fill_(0)
     iou_mask = FloatTensor(nB, nA, nG, nG).fill_(0)
     tx = FloatTensor(nB, nA, nG, nG).fill_(0)
@@ -334,7 +334,6 @@ def build_targets(pred_boxes, pred_cls, target, anchors, ignore_thres):
 
     tconf = obj_mask.float()
     return iou_scores, class_mask, obj_mask, noobj_mask, tx, ty, tw, th, tcls, tconf
-
 
 # >> Test Phase
 if __name__ == "__main__" :
